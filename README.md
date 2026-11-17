@@ -1,3 +1,7 @@
+# CS387-Super-Mario-Gen
+
+Procedural level generation for the Super Mario AI Framework, focused on creating playable, varied, and reproducible levels for Drexel’s CS 387 Game AI course.
+
 <p align="center">
 <a href="#features">Features</a> &mdash; <a href="#use">How To Use</a> &mdash; <a href="#papers">Related Papers</a> &mdash; <a href="#missing">Missing Features</a> &mdash; <a href="#copyrights">Copyrights</a>
 </p>
