@@ -5,12 +5,12 @@ import java.util.Random;
 import engine.core.MarioLevelModel;
 
 public final class StaircaseGapChunk implements Chunk {
-    private static final int STEP_COUNT = 3;
+    private static final int MIN_STEP_COUNT = 4;
+    private static final int MAX_STEP_COUNT = 8;
     private static final int GROUND_PADDING = 3;
-    private static final int RUNWAY_WIDTH = 12;
-    private static final int LANDING_WIDTH = 6;
-    // Measured with equal-height surfaces, full running speed, and a held jump.
-    private static final int GAP_WIDTH = 11;
+    private static final int RUNWAY_WIDTH = 1;
+    private static final int LANDING_WIDTH = 1;
+    private static final int GAP_WIDTH = 8;
 
     @Override
     public String name() {
@@ -24,38 +24,40 @@ public final class StaircaseGapChunk implements Chunk {
 
     @Override
     public int minWidth() {
-        return 48;
+        return 24;
     }
 
     @Override
     public int maxWidth() {
-        return 64;
+        return 40;
     }
 
     @Override
     public int place(MarioLevelModel model, int x, int width, int groundHeight, Random random) {
-        ChunkTerrain.prepareGround(this, model, x, width, groundHeight, STEP_COUNT + 3, random);
+        ChunkTerrain.prepareGround(this, model, x, width, groundHeight, MIN_STEP_COUNT + 3, random);
 
-        int fixedWidth = 2 * GROUND_PADDING + 2 * STEP_COUNT + RUNWAY_WIDTH + GAP_WIDTH + LANDING_WIDTH;
+        int fixedWidth = 2 * GROUND_PADDING + RUNWAY_WIDTH + GAP_WIDTH + LANDING_WIDTH;
+        int maxSteps = Math.min(MAX_STEP_COUNT, Math.min(groundHeight - 3, (width - fixedWidth) / 2));
+        int stepCount = MIN_STEP_COUNT + random.nextInt(maxSteps - MIN_STEP_COUNT + 1);
+        fixedWidth += 2 * stepCount;
         int extraWidth = width - fixedWidth;
-        int runwayWidth = RUNWAY_WIDTH + extraWidth / 2;
-        int landingWidth = LANDING_WIDTH + extraWidth - extraWidth / 2;
-        int runwayX = x + GROUND_PADDING + STEP_COUNT;
-        int gapX = runwayX + runwayWidth;
+        int stairsX = x + GROUND_PADDING + extraWidth / 2;
+        int runwayX = stairsX + stepCount;
+        int gapX = runwayX + RUNWAY_WIDTH;
         int landingX = gapX + GAP_WIDTH;
-        int descendingX = landingX + landingWidth;
-        int topY = groundHeight - STEP_COUNT;
+        int descendingX = landingX + LANDING_WIDTH;
+        int topY = groundHeight - stepCount;
 
-        for (int step = 1; step <= STEP_COUNT; step++) {
-            model.setRectangle(x + GROUND_PADDING + step - 1, groundHeight - step,
+        for (int step = 1; step <= stepCount; step++) {
+            model.setRectangle(stairsX + step - 1, groundHeight - step,
                     1, step, MarioLevelModel.PYRAMID_BLOCK);
-            int descendingHeight = STEP_COUNT - step + 1;
+            int descendingHeight = stepCount - step + 1;
             model.setRectangle(descendingX + step - 1, groundHeight - descendingHeight,
                     1, descendingHeight, MarioLevelModel.PYRAMID_BLOCK);
         }
-        model.setRectangle(runwayX, topY, runwayWidth, STEP_COUNT, MarioLevelModel.PYRAMID_BLOCK);
+        model.setRectangle(runwayX, topY, RUNWAY_WIDTH, stepCount, MarioLevelModel.PYRAMID_BLOCK);
         model.setRectangle(gapX, 0, GAP_WIDTH, model.getHeight(), MarioLevelModel.EMPTY);
-        model.setRectangle(landingX, topY, landingWidth, STEP_COUNT, MarioLevelModel.PYRAMID_BLOCK);
+        model.setRectangle(landingX, topY, LANDING_WIDTH, stepCount, MarioLevelModel.PYRAMID_BLOCK);
         return groundHeight;
     }
 }
