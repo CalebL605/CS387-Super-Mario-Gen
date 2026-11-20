@@ -15,6 +15,7 @@ public class LevelGenerator implements MarioLevelGenerator {
 
     @Override
     public String getGeneratedLevel(MarioLevelModel model, MarioTimer timer) {
+        // TODO (#6): Assemble start, paced challenge/recovery chunks, and exit.
         // Clear the level map before generating a new level
         model.clearMap();
 
