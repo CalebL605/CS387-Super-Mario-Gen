@@ -1,5 +1,7 @@
 package levelGenerators.npclrf;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import engine.core.MarioLevelGenerator;
@@ -7,6 +9,8 @@ import engine.core.MarioLevelModel;
 import engine.core.MarioTimer;
 
 public class LevelGenerator implements MarioLevelGenerator {
+    public static final int MIN_WIDTH = PacingGrammar.MIN_WIDTH;
+    private static final int MIN_HEIGHT = 10;
     private final Random random;
 
     public LevelGenerator(long randomSeed) {
@@ -15,28 +19,22 @@ public class LevelGenerator implements MarioLevelGenerator {
 
     @Override
     public String getGeneratedLevel(MarioLevelModel model, MarioTimer timer) {
-        // TODO (#6): Assemble start, paced challenge/recovery chunks, and exit.
-        // Clear the level map before generating a new level
-        model.clearMap();
-
-        int width = model.getWidth();
-        int height = model.getHeight();
-
-        // Fill the bottom two rows with solid ground.
-        int groundY = height - 2;
-        model.setRectangle(0, groundY, width, 2, MarioLevelModel.GROUND);
-
-        // Place Mario and the finish directly above the ground on opposite ends.
-        model.setBlock(1, groundY - 1, MarioLevelModel.MARIO_START);
-        model.setBlock(width - 2, groundY - 1, MarioLevelModel.MARIO_EXIT);
-
-        // Each interior column has a 15% chance of containing a coin.
-        for (int x = 2; x < width - 2; x++) {
-            if (random.nextDouble() < 0.15) {
-                model.setBlock(x, groundY - 2, MarioLevelModel.COIN);
-            }
+        Objects.requireNonNull(model, "model");
+        if (model.getWidth() < MIN_WIDTH) {
+            throw new IllegalArgumentException("Level width must be at least " + MIN_WIDTH + " tiles.");
+        }
+        if (model.getHeight() < MIN_HEIGHT) {
+            throw new IllegalArgumentException("Level height must be at least " + MIN_HEIGHT + " tiles.");
         }
 
+        List<PacingGrammar.Section> sections = PacingGrammar.plan(model.getWidth(), random);
+        model.clearMap();
+        int x = 0;
+        int groundHeight = model.getHeight() - 2;
+        for (PacingGrammar.Section section : sections) {
+            groundHeight = section.chunk().place(model, x, section.width(), groundHeight, random);
+            x += section.width();
+        }
         return model.getMap();
     }
 
