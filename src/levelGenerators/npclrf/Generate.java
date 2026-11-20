@@ -13,8 +13,7 @@ public final class Generate {
     private static final int LEVEL_HEIGHT = 16;
     private static final long GENERATION_TIME = 5 * 60 * 60 * 1000;
 
-    private Generate() {
-    }
+    private Generate() {} // Class is not instantiable
 
     public static void main(String[] args) {
         try {

@@ -13,6 +13,8 @@ public final class Play {
     private static final int GAME_TIME_SECONDS = 20;
     private static final int MARIO_STATE = 0;
 
+    private Play() {} // Class is not instantiable
+
     public static void main(String[] args) {
         try {
             play(args);
