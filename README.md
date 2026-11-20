@@ -1,6 +1,10 @@
 # CS387 Super Mario Level Generation
 
-This is a project for the CS387 course at Drexel University. The goal of this project is to generate levels for a Super Mario Framework using procedural content generation techniques.
+Our CS387 project at Drexel generates Super Mario levels using a pacing grammar
+and reusable chunks (tiles). Each level starts with a safe area, builds up to
+harder encounters, gives the player a break, and finishes with a final challenge.
+The generator saves levels as text files that the Mario AI Framework can load.
+You can play them yourself or watch the Robin Baumgarten A* agent play.
 
 See the [original framework documentation](FRAMEWORK_README.md).
 
@@ -19,31 +23,104 @@ See the [original framework documentation](FRAMEWORK_README.md).
 
 ### Requirements
 
-- TODO document the agreed Java target and supported JDK versions.
-- TODO explain Git Bash setup on Windows and shell requirements on macOS/Linux.
+- **JDK 25.** Install the full JDK so both `java` and `javac` are available.
+  A newer JDK also works if it supports compiling with `--release 25`.
+- **Git.** On Windows, use the Git Bash terminal included with Git for Windows
+  for the commands below. On macOS or Linux, use your usual terminal with Bash
+  installed.
 
 ### Build
 
-- TODO provide clone and build commands, run from the repository root.
-- TODO explain where compiled classes are written and how to verify the build.
+```bash
+git clone https://github.com/CalebL605/CS387-Super-Mario-Gen.git
+cd CS387-Super-Mario-Gen
+bash scripts/build.sh
+```
+
+The build script compiles everything in `src/` for Java 25 and writes the classes
+to `out/`. It prints the number of compiled source files when it finishes.
 
 ## Generating Levels
 
-- TODO provide commands for generating one level and a batch of levels.
-- TODO document the seed, count, width, and output options, including defaults and valid ranges.
-- TODO explain output filenames and how batch seeds map to individual files.
-- TODO describe how to reproduce identical output with the same seed and parameters.
+Generate one level with the default settings:
+
+```bash
+bash scripts/generate.sh
+```
+
+This saves a 200-by-16-tile level to `levels/npclrf/lvl-1.txt` using seed 1.
+
+To generate a batch:
+
+```bash
+bash scripts/generate.sh --seed 1 --count 5 --width 200
+```
+
+This writes `lvl-1.txt` through `lvl-5.txt`, using seeds 1 through 5.
+The filenames always start at `lvl-1.txt`. For example, `--seed 100 --count 5`
+uses seeds 100 through 104 but still names the files `lvl-1.txt` through
+`lvl-5.txt`.
+
+| Option | Default | What it controls |
+| --- | --- | --- |
+| `--seed <long>` | `1` | Seed for the first level. Accepts a signed 64-bit integer. |
+| `--count <int>` | `1` | Number of levels to generate. Must be at least 1. |
+| `--width <int>` | `200` | Width in tiles. Must be at least 84 to fit the pacing grammar. |
+| `--out <path>` | `levels/npclrf` | Folder for the generated level files. |
+| `--help`, `-h` | | Prints the available options. |
+
+The height is fixed at 16 tiles. Each level in a batch uses the next consecutive
+seed, and the whole seed range must fit in a Java `long`.
+
+**Existing files with matching names are overwritten.** The generator creates
+the output folder if needed and leaves other files in it alone. Use a different
+folder to keep another batch.
+
+With the same generator version, seed, and width, you get the same level file.
+Changing the seed gives you another layout. The agent's runs can still differ
+because its search uses a time limit.
 
 ## Playing and Watching Levels
 
-- TODO provide commands for playing a saved level manually and watching the agent play it.
-- TODO document controls, level selection, Mario's starting state, and the game time limit.
+Play a saved level yourself:
+
+```bash
+java -cp out levelGenerators.npclrf.Play --human --level levels/npclrf/lvl-1.txt
+```
+
+Watch the Robin Baumgarten A* agent play it:
+
+```bash
+java -cp out levelGenerators.npclrf.Play --agent --level levels/npclrf/lvl-1.txt
+```
+
+Change the path after `--level` to choose another file. If you leave out the
+options, `Play` watches the agent on `levels/npclrf/lvl-1.txt`. Both modes start
+as small Mario with 20 seconds on the game clock and open a desktop window.
+The terminal prints the result when the run ends. Close the window to exit.
+
+| Key | Action |
+| --- | --- |
+| Left / Right arrow | Move |
+| Down arrow | Duck |
+| S | Jump |
+| A | Run, or shoot if Mario has firepower |
+
+You can also use the starter [`src/GenerateLevel.java`](src/GenerateLevel.java)
+to generate and play a level. This file can be modified to change the seed, width,
+or other parameters as needed.
 
 ## Generated Level Collection
 
-- TODO link to the team's output folder once the level files are available.
-- TODO document the command, seeds, and parameters used to generate the submitted collection of at least 20 levels.
-- TODO show a few example levels with screenshots, seeds, and short descriptions of their differences.
+Our levels are in [`levels/npclrf/`](levels/npclrf/). The five current examples
+use seeds 1 through 5, with a width of 200 and a height of 16. Regenerate them
+with:
+
+```bash
+bash scripts/generate.sh --seed 1 --count 5 --width 200
+```
+
+<!-- Nic will add the final collection and its generation command. -->
 
 ## Reproducing the Experiments
 
@@ -105,7 +182,9 @@ See the [original framework documentation](FRAMEWORK_README.md).
 
 ## Third-party Code and References
 
-- TODO credit the Mario AI Framework and its authors, linking to the original documentation above.
-- TODO identify the reused Robin Baumgarten agent and any other reused code, libraries, or assets.
-- TODO list the course slide citations and external references used in the write-up.
-- TODO retain applicable attribution and usage notices from the framework.
+This project builds on the Mario AI Framework provided with the assignment,
+including its engine, assets, example levels, and Robin Baumgarten A* agent. See
+[the original framework documentation](FRAMEWORK_README.md) for credits and usage
+notices. We added no external Java libraries.
+
+<!-- Edit this section if third-party code or references are added. -->
