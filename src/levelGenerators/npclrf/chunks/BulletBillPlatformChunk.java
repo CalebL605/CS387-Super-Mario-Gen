@@ -6,11 +6,12 @@ import engine.core.MarioLevelModel;
 
 public final class BulletBillPlatformChunk implements Chunk {
     private static final int GROUND_PADDING = 6;
-    // Two ascending stair sets use even and odd heights to cover different firing rows.
-    private static final int[] PLATFORM_HEIGHTS = {2, 4, 6, 1, 3, 5};
-    private static final int[] LOW_PLATFORM_HEIGHTS = {2, 4, 1, 3};
-    private static final int PLATFORM_GAP = 2;
+    private static final int STEPS_PER_SET = 3;
+    private static final int HEIGHT_STEP = 3;
+    private static final int PLATFORM_OVERLAP = 2;
     private static final int CANNON_HEIGHT = 2;
+    private static final int MIN_PLATFORM_WIDTH = 6;
+    private static final int MAX_PLATFORM_WIDTH = 10;
 
     @Override
     public String name() {
@@ -24,38 +25,50 @@ public final class BulletBillPlatformChunk implements Chunk {
 
     @Override
     public int minWidth() {
-        return 48;
+        int platformCount = 2 * STEPS_PER_SET;
+        return 2 * GROUND_PADDING + platformCount * MIN_PLATFORM_WIDTH
+                - (platformCount - 1) * PLATFORM_OVERLAP;
     }
 
     @Override
     public int maxWidth() {
-        return 80;
+        int platformCount = 2 * STEPS_PER_SET;
+        return 2 * GROUND_PADDING + platformCount * MAX_PLATFORM_WIDTH
+                - (platformCount - 1) * PLATFORM_OVERLAP;
     }
 
     @Override
     public int place(MarioLevelModel model, int x, int width, int groundHeight, Random random) {
         ChunkTerrain.prepareGround(this, model, x, width, groundHeight, 8, random);
 
-        int[] heights = groundHeight >= 10 ? PLATFORM_HEIGHTS : LOW_PLATFORM_HEIGHTS;
+        // Shorter maps use fewer steps to leave room above the taller cannons.
+        int maxPlatformHeight = groundHeight - CANNON_HEIGHT - 3;
+        int stepsPerSet = Math.min(STEPS_PER_SET, (maxPlatformHeight - 2) / HEIGHT_STEP + 1);
+        int platformCount = 2 * stepsPerSet;
         int interiorWidth = width - 2 * GROUND_PADDING;
-        int platformSpace = interiorWidth - PLATFORM_GAP * (heights.length - 1);
+        int platformSpace = interiorWidth + PLATFORM_OVERLAP * (platformCount - 1);
         int platformX = x + GROUND_PADDING;
         model.setRectangle(platformX, groundHeight, interiorWidth,
                 model.getHeight() - groundHeight, MarioLevelModel.EMPTY);
 
-        for (int index = 0; index < heights.length; index++) {
-            int platformWidth = platformSpace / heights.length
-                    + (index < platformSpace % heights.length ? 1 : 0);
-            int platformY = groundHeight - heights[index];
+        for (int index = 0; index < platformCount; index++) {
+            int platformWidth = platformSpace / platformCount
+                    + (index < platformSpace % platformCount ? 1 : 0);
+            int platformHeight = (index < stepsPerSet ? 2 : 1) + index % stepsPerSet * HEIGHT_STEP;
+            int platformY = groundHeight - platformHeight;
             model.setRectangle(platformX, platformY, platformWidth, 1, MarioLevelModel.PLATFORM);
-            model.setRectangle(platformX + platformWidth - 2, platformY - CANNON_HEIGHT,
+            // Keep both cannons before the columns overlapped by the next platform.
+            int cannonX = platformX + platformWidth - PLATFORM_OVERLAP - 2;
+            model.setRectangle(cannonX, platformY - CANNON_HEIGHT,
                     1, CANNON_HEIGHT, MarioLevelModel.BULLET_BILL);
+            model.setRectangle(cannonX + 1, platformY - CANNON_HEIGHT - 1,
+                    1, CANNON_HEIGHT + 1, MarioLevelModel.BULLET_BILL);
             if (index % 2 == 0) {
                 char enemy = index == 2
                         ? MarioLevelModel.GREEN_KOOPA_WINGED : MarioLevelModel.GOOMBA_WINGED;
                 model.setBlock(platformX + 1, platformY - 1, enemy);
             }
-            platformX += platformWidth + PLATFORM_GAP;
+            platformX += platformWidth - PLATFORM_OVERLAP;
         }
         return groundHeight;
     }
