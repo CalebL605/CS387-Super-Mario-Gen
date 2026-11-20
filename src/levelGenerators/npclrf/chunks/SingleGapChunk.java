@@ -4,13 +4,13 @@ import java.util.Random;
 
 import engine.core.MarioLevelModel;
 
-public final class GapChunk implements Chunk {
+public final class SingleGapChunk implements Chunk {
     private static final int GROUND_PADDING = 3;
     private final FlatChunk ground = new FlatChunk();
 
     @Override
     public String name() {
-        return "gap";
+        return "single-gap";
     }
 
     @Override
@@ -31,7 +31,7 @@ public final class GapChunk implements Chunk {
     @Override
     public int place(MarioLevelModel model, int x, int width, int groundHeight, Random random) {
         if (width < minWidth() || width > maxWidth()) {
-            throw new IllegalArgumentException("Gap chunk width must be between 8 and 16.");
+            throw new IllegalArgumentException("Single gap chunk width must be between 8 and 16.");
         }
         ground.place(model, x, width, groundHeight, random);
 

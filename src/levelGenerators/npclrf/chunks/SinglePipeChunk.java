@@ -4,14 +4,14 @@ import java.util.Random;
 
 import engine.core.MarioLevelModel;
 
-public final class PipeChunk implements Chunk {
+public final class SinglePipeChunk implements Chunk {
     private static final int PIPE_WIDTH = 2;
     private static final int GROUND_PADDING = 3;
     private final FlatChunk ground = new FlatChunk();
 
     @Override
     public String name() {
-        return "pipe";
+        return "single-pipe";
     }
 
     @Override
@@ -32,7 +32,7 @@ public final class PipeChunk implements Chunk {
     @Override
     public int place(MarioLevelModel model, int x, int width, int groundHeight, Random random) {
         if (width < minWidth() || width > maxWidth()) {
-            throw new IllegalArgumentException("Pipe chunk width must be between 8 and 16.");
+            throw new IllegalArgumentException("Single pipe chunk width must be between 8 and 16.");
         }
         ground.place(model, x, width, groundHeight, random);
 

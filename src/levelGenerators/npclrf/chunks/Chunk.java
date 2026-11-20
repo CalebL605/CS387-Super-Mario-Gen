@@ -7,10 +7,7 @@ import engine.core.MarioLevelModel;
 public interface Chunk {
     String name();
 
-    /**
-     * Return 0 for a recovery section, or 1 through 3 for increasing difficulty.
-     */
-    int difficulty();
+    int difficulty(); // Return 0 for a recovery section, or 1 through 3 for increasing difficulty.
 
     int minWidth();
 
@@ -20,8 +17,9 @@ public interface Chunk {
      * Replace the tiles in columns [x, x + width), preserving all other columns.
      * Ground height is the zero-based row of the first solid ground tile.
      * Starter chunks require at least three rows above that ground and enter
-     * and exit at the same ground height. Start and finish markers are placed
-     * by the assembler outside these sections, or after chunk placement.
+     * and exit at the same ground height. Start and exit chunks place
+     * their own markers. The assembler places those chunks at the level
+     * boundaries and preserves their marker columns.
      *
      * @param model destination level
      * @param x first column owned by this chunk

@@ -1,8 +1,7 @@
 package levelGenerators.npclrf;
 
 public final class PlayabilityChecker {
-    private PlayabilityChecker() {
-    }
+    private PlayabilityChecker() {} // Class is not instantiable
 
     /**
      * Fail column is zero-based, or -1 when no failure column is available.
