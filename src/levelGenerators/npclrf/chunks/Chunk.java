@@ -7,7 +7,7 @@ import engine.core.MarioLevelModel;
 public interface Chunk {
     String name();
 
-    int difficulty(); // Return 0 for a recovery section, or 1 through 3 for increasing difficulty.
+    int difficulty(); // Return 0 for a recovery section, or 1 through 3 for increasing difficulty. Or 4 for a special section.
 
     int minWidth();
 
