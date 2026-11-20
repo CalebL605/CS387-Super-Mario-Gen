@@ -9,7 +9,6 @@ import engine.core.MarioTimer;
 public class LevelGenerator implements MarioLevelGenerator {
     private final Random random;
 
-
     public LevelGenerator(long randomSeed) {
         this.random = new Random(randomSeed);
     }

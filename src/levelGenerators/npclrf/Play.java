@@ -57,13 +57,9 @@ public final class Play {
 
         System.out.printf("Opening %s (%s mode)%n", levelPath, humanControlled ? "human" : "agent");
         MarioGame game = new MarioGame();
-        MarioResult result;
-
-        if (humanControlled) {
-            result = game.playGame(level, GAME_TIME_SECONDS, MARIO_STATE);
-        } else {
-            result = game.runGame(new agents.robinBaumgarten.Agent(), level, GAME_TIME_SECONDS, MARIO_STATE, true);
-        }
+        MarioResult result = humanControlled
+                ? game.playGame(level, GAME_TIME_SECONDS, MARIO_STATE)
+                : game.runGame(new agents.robinBaumgarten.Agent(), level, GAME_TIME_SECONDS, MARIO_STATE, true);
 
         System.out.printf("Game Status: %s Percentage Completion: %.1f%%%nCoins: %d Kills: %d Remaining Time: %d seconds%n",
                 result.getGameStatus(),
