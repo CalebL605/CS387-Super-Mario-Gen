@@ -141,9 +141,33 @@ bash scripts/generate.sh --seed 1 --count 5 --width 200
 
 <!-- Caleb owns this subsection. -->
 
-- TODO explain the intended player experience and the goals for fairness, pacing, reproducibility, and variety.
-- TODO describe the pipeline from seed and parameters through grammar, chunks, validation, and level output.
-- TODO explain how the generator integrates with the Mario AI Framework.
+We wanted levels with a clear rhythm. The player gets a safe start, faces harder
+encounters, takes a short break, and reaches a final challenge before the flag.
+Our goals are fair obstacles, recognizable level structure, reproducible output,
+and varied layouts, adapting the map qualities discussed in class
+[PCG II slide 58].
+
+We separate encounter order from tile layout, following the lecture's distinction
+between mission and space [PCG II slides 32–33]. A pacing grammar chooses the
+sections, and reusable chunks fill them with terrain and enemies, drawing on
+the tiling approach [PCG I slide 70]. The overall sequence is:
+
+```text
+START -> BUILDUP -> PEAK -> RECOVERY -> BUILDUP -> CLIMAX -> EXIT
+```
+
+`Generate` passes a seed and width to `LevelGenerator`. `PacingGrammar` selects
+chunks and allocates widths within their supported ranges to fill the map.
+The assembler places them left to right, passing each chunk's exit ground height
+to the next. Start and exit chunks place `M` and `F`. Every random choice uses
+the same seeded random generator, so the same seed, width, and generator version
+produce the same text file. The framework loads that file for human play or
+agent evaluation.
+
+The planned next stage is a deterministic playability check with bounded retries,
+following generate and test [PCG II slides 46–47]. The checker is currently a stub;
+generation places chunks and saves the map directly. The A* agent runs separately,
+so its search timing does not affect which map gets saved.
 
 ### Generation Technique
 
@@ -179,6 +203,9 @@ bash scripts/generate.sh --seed 1 --count 5 --width 200
 | Ryan (`rfitzpatrick517`) | Evaluation harness, experiments, metrics, and results. |
 
 <!-- Update this table to reflect actual contributions before submission. -->
+
+[Caleb's presentation draft](docs/presentation-notes.md) covers the design goal
+and architecture in roughly 60 seconds over the live demo.
 
 ## Third-party Code and References
 
