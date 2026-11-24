@@ -52,8 +52,9 @@ public final class Generate {
         if (count < 1) {
             throw new IllegalArgumentException("--count must be at least 1.");
         }
-        if (width < 4) {
-            throw new IllegalArgumentException("--width must be at least 4 tiles.");
+        if (width < LevelGenerator.MIN_WIDTH) {
+            throw new IllegalArgumentException("--width must be at least " + LevelGenerator.MIN_WIDTH
+                    + " tiles for the pacing grammar.");
         }
         if (seed > Long.MAX_VALUE - (count - 1L)) {
             throw new IllegalArgumentException("The requested seed range exceeds Long.MAX_VALUE.");
@@ -87,12 +88,12 @@ public final class Generate {
 
                   --seed <long>   Starting seed (default 1)
                   --count <int>   Number of levels, at least 1 (default 1)
-                  --width <int>   Width in tiles, at least 4 (default 200)
+                  --width <int>   Width in tiles, at least %d (default 200)
                   --out <path>    Output directory (default levels/npclrf)
                   --help, -h      Shows this help message
 
                 Levels have 16 rows. Files are named lvl-1.txt, lvl-2.txt, and so on.
                 Each file uses the next consecutive seed. Existing matching files are replaced.
-                """);
+                """.formatted(LevelGenerator.MIN_WIDTH));
     }
 }
