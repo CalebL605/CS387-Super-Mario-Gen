@@ -141,19 +141,48 @@ bash scripts/generate.sh --seed 1 --count 5 --width 200
 
 <!-- Caleb owns this subsection. -->
 
-- TODO explain the intended player experience and the goals for fairness, pacing, reproducibility, and variety.
-- TODO describe the pipeline from seed and parameters through grammar, chunks, validation, and level output.
-- TODO explain how the generator integrates with the Mario AI Framework.
+Our goal at the beginning was to create a level generator that used grammar
+rules as the technique or one of the techniques for generating levels. When
+brainstorming, we decided that using a tiling approach would best fit with
+grammar rules and it would allow us to create levels that are both varied and
+structured. It was also easier to implement and maintain than other approaches.
+So with this in mind, we used tiling to create chunks of the map that could be
+reused and combined according to the grammar rules. We also gave the chunks some
+randomness controlled by the seed to ensure that the generated levels would have
+even more variety.
+
+We wanted levels to start with easier challenges, build up to harder sections,
+give the player a short recovery, and finish with a final challenge. The generator
+uses the grammar to choose the section order, then selects chunks and assigns
+their widths to fit the level. It places the chunks from left to right with
+matching ground heights, a start, and an exit. The same seed and width reproduce
+the same level when using the same generator version. The grammar itself is
+defined in the section below.
 
 ### Generation Technique
 
 <!-- Nic owns this subsection, with Caleb contributing the grammar and assembler explanation. -->
 
-- TODO describe the pacing grammar and provide a small example of its production rules.
-- TODO explain chunk types, parameters, selection, and boundary constraints.
-- TODO describe the reachability model, movement calibration, regeneration, and retry limit behavior.
-- TODO distinguish the checker's assumptions from evidence obtained through engine playthroughs.
-- TODO cite the relevant course lectures and any external techniques actually used.
+| Symbol | Expands to |
+| --- | --- |
+| `LEVEL` | `START BUILDUP PEAK RECOVERY BUILDUP CLIMAX EXIT` |
+| `START` | `start` |
+| `EXIT` | `exit` or `staircase-exit` |
+| `BUILDUP` | `D1` or `D1 BUILDUP` or `D1 D2` |
+| `PEAK` | `D3` or `D2 PEAK` |
+| `RECOVERY` | `D0` or `D0 RECOVERY` |
+| `CLIMAX` | `D3` or `D3 CLIMAX` or `D4` |
+
+`D` stands for difficulty. Difficulty of chunks ranges from `D0` (easiest) to
+`D4` (hardest).
+
+The assembler expands the grammar from left to right, randomly choosing one of
+the available grammar rules that leave enough room for the remaining sections.
+It selects matching chunks with the required difficulty and width, and assigns
+widths within their limits to fill the requested level width. Extra flat chunks
+can also be added to the recovery section if needed to fill the requested level
+width. Chunks are then placed in order, passing the ground height to the next
+chunk so the ground level of each chunk lines up and looks continuous.
 
 ### Evaluation and Results
 
