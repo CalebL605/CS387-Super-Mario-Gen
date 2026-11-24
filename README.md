@@ -199,6 +199,17 @@ chunk so the ground level of each chunk lines up and looks continuous.
 - TODO discuss observed failure cases, repetition, checker limitations, and agent evaluation variability.
 - TODO explain what worked, what changed during development, and what the team learned.
 
+- There was limitation to how much variety we could achieve in the generated
+  levels, even with all the randomization applied within each chunk. The
+  downside of an easier approach and more playable levels was that the chunk
+  library limited the variety of layouts we could generate.
+- Combining grammar rules with tiling made the assembler more complex than we
+  expected. A rule could fit the current section but use up the width needed by
+  later sections. We had to reserve the minimum widths of the remaining sections
+  before choosing an expansion, which also bounded recursion. The assembler then
+  had to fit the selected chunks into the level and keep their boundaries like
+  the ground level aligned.
+
 ## Team Contributions
 
 | Team member | Planned responsibilities |
