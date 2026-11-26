@@ -65,7 +65,7 @@ uses seeds 100 through 104 but still names the files `lvl-1.txt` through
 | --- | --- | --- |
 | `--seed <long>` | `1` | Seed for the first level. Accepts a signed 64-bit integer. |
 | `--count <int>` | `1` | Number of levels to generate. Must be at least 1. |
-| `--width <int>` | `200` | Width in tiles. Must be at least 84 to fit the pacing grammar. |
+| `--width <int>` | `200` | Width in tiles. Must be at least 68 to fit the pacing grammar. |
 | `--out <path>` | `levels/npclrf` | Folder for the generated level files. |
 | `--help`, `-h` | | Prints the available options. |
 
@@ -79,6 +79,33 @@ folder to keep another batch.
 With the same generator version, seed, and width, you get the same level file.
 Changing the seed gives you another layout. The agent's runs can still differ
 because its search uses a time limit.
+
+### Checking Playability
+
+The generator only saves levels that pass its static playability checker (see
+the [write-up](docs/writeup.md#generation-technique)). Run the checker yourself
+from the repository root:
+
+```bash
+bash scripts/check.sh levels/npclrf/*.txt
+bash scripts/check.sh --seeds 1 100
+```
+
+The first command checks saved level files. The second generates seeds 1–100
+twice each. It prints `seed,playable,reproducible,retries,fallbacks` as CSV,
+then a summary line. Other options:
+
+| Option | What it does |
+| --- | --- |
+| `--measured` | Checks files against the raw engine measurements instead of the design limits. |
+| `--width <int>` | Level width for `--seeds` (default 200). |
+| `--spot-check` | Runs hand-built levels with known answers. |
+| `--chunks` | Places every chunk alone at every width it allows and checks each placement. |
+
+The checker exits with status 3 if any level fails. Use
+`java -cp out levelGenerators.npclrf.JumpProbe` to re-measure Mario's jump
+limits in the engine. It exits with status 1 if they no longer match
+`JumpLimits`.
 
 ## Playing and Watching Levels
 
@@ -112,15 +139,28 @@ or other parameters as needed.
 
 ## Generated Level Collection
 
-Our levels are in [`levels/npclrf/`](levels/npclrf/). The five current examples
-use seeds 1 through 5, with a width of 200 and a height of 16. Regenerate them
+Our final collection is the 20 levels in [`levels/npclrf/`](levels/npclrf/),
+generated from seeds 1 through 20 with a width of 200 and a height of 16. To
+regenerate them byte for byte:
+
+```bash
+bash scripts/generate.sh --seed 1 --count 20 --width 200
+```
+
+Every level passes the playability checker:
+
+```bash
+bash scripts/check.sh levels/npclrf/*.txt
+```
+
+Screenshots of four examples are in [`docs/img/`](docs/img/):
+[seed 1](docs/img/lvl-1.png), [seed 4](docs/img/lvl-4.png),
+[seed 7](docs/img/lvl-7.png) and [seed 16](docs/img/lvl-16.png). Re-render one
 with:
 
 ```bash
-bash scripts/generate.sh --seed 1 --count 5 --width 200
+java -cp out levelGenerators.npclrf.Screenshot --level levels/npclrf/lvl-4.txt --out docs/img/lvl-4.png
 ```
-
-<!-- Nic will add the final collection and its generation command. -->
 
 ## Reproducing the Experiments
 
@@ -135,80 +175,9 @@ bash scripts/generate.sh --seed 1 --count 5 --width 200
 
 ## Project Write-up
 
-<!-- Keep the completed narrative in this section to approximately 1–2 pages. -->
-
-### Design Goal and Architecture
-
-<!-- Caleb owns this subsection. -->
-
-Our goal at the beginning was to create a level generator that used grammar
-rules as the technique or one of the techniques for generating levels. When
-brainstorming, we decided that using a tiling approach would best fit with
-grammar rules and it would allow us to create levels that are both varied and
-structured. It was also easier to implement and maintain than other approaches.
-So with this in mind, we used tiling to create chunks of the map that could be
-reused and combined according to the grammar rules. We also gave the chunks some
-randomness controlled by the seed to ensure that the generated levels would have
-even more variety.
-
-We wanted levels to start with easier challenges, build up to harder sections,
-give the player a short recovery, and finish with a final challenge. The generator
-uses the grammar to choose the section order, then selects chunks and assigns
-their widths to fit the level. It places the chunks from left to right with
-matching ground heights, a start, and an exit. The same seed and width reproduce
-the same level when using the same generator version. The grammar itself is
-defined in the section below.
-
-### Generation Technique
-
-<!-- Nic owns this subsection, with Caleb contributing the grammar and assembler explanation. -->
-
-| Symbol | Expands to |
-| --- | --- |
-| `LEVEL` | `START BUILDUP PEAK RECOVERY BUILDUP CLIMAX EXIT` |
-| `START` | `start` |
-| `EXIT` | `exit` or `staircase-exit` |
-| `BUILDUP` | `D1` or `D1 BUILDUP` or `D1 D2` |
-| `PEAK` | `D3` or `D2 PEAK` |
-| `RECOVERY` | `D0` or `D0 RECOVERY` |
-| `CLIMAX` | `D3` or `D3 CLIMAX` or `D4` |
-
-`D` stands for difficulty. Difficulty of chunks ranges from `D0` (easiest) to
-`D4` (hardest).
-
-The assembler expands the grammar from left to right, randomly choosing one of
-the available grammar rules that leave enough room for the remaining sections.
-It selects matching chunks with the required difficulty and width, and assigns
-widths within their limits to fill the requested level width. Extra flat chunks
-can also be added to the recovery section if needed to fill the requested level
-width. Chunks are then placed in order, passing the ground height to the next
-chunk so the ground level of each chunk lines up and looks continuous.
-
-### Evaluation and Results
-
-<!-- Ryan owns this subsection. -->
-
-- TODO summarize the experiment design and compare generated levels with the baselines.
-- TODO include the measured results table and any plots that help explain it.
-- TODO interpret playability, variety, retry counts, and other selected measurements against the design goals.
-
-### Limitations and Lessons Learned
-
-<!-- Each teammate contributes findings from their work. -->
-
-- TODO discuss observed failure cases, repetition, checker limitations, and agent evaluation variability.
-- TODO explain what worked, what changed during development, and what the team learned.
-
-- There was limitation to how much variety we could achieve in the generated
-  levels, even with all the randomization applied within each chunk. The
-  downside of an easier approach and more playable levels was that the chunk
-  library limited the variety of layouts we could generate.
-- Combining grammar rules with tiling made the assembler more complex than we
-  expected. A rule could fit the current section but use up the width needed by
-  later sections. We had to reserve the minimum widths of the remaining sections
-  before choosing an expansion, which also bounded recursion. The assembler then
-  had to fit the selected chunks into the level and keep their boundaries like
-  the ground level aligned.
+The 1–2 page write-up is in [`docs/writeup.md`](docs/writeup.md). It covers the
+design goal and architecture, the generation technique, evaluation and results,
+and limitations and lessons learned.
 
 ## Team Contributions
 

@@ -3,6 +3,7 @@ package levelGenerators.npclrf.chunks;
 import java.util.Random;
 
 import engine.core.MarioLevelModel;
+import levelGenerators.npclrf.JumpLimits;
 
 public final class SinglePipeChunk implements Chunk {
     private static final int PIPE_WIDTH = 2;
@@ -32,7 +33,7 @@ public final class SinglePipeChunk implements Chunk {
     public int place(MarioLevelModel model, int x, int width, int groundHeight, Random random) {
         ChunkTerrain.prepareGround(this, model, x, width, groundHeight, 6, random);
 
-        int pipeHeight = 2 + random.nextInt(3);
+        int pipeHeight = 2 + random.nextInt(JumpLimits.MAX_RISE - 1); // 2 up to the rise limit
         int positionCount = width - PIPE_WIDTH - 2 * GROUND_PADDING + 1;
         int pipeX = x + GROUND_PADDING + random.nextInt(positionCount);
         model.setRectangle(pipeX, groundHeight - pipeHeight, PIPE_WIDTH, pipeHeight, MarioLevelModel.PIPE);
