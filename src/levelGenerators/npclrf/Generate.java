@@ -10,8 +10,8 @@ import engine.core.MarioLevelModel;
 import engine.core.MarioTimer;
 
 public final class Generate {
-    private static final int LEVEL_HEIGHT = 16;
-    private static final long GENERATION_TIME = 5 * 60 * 60 * 1000;
+    static final int LEVEL_HEIGHT = 16;
+    static final long GENERATION_TIME = 5 * 60 * 60 * 1000;
 
     private Generate() {} // Class is not instantiable
 
