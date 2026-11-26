@@ -5,11 +5,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import levelGenerators.npclrf.chunks.BlockRowChunk;
 import levelGenerators.npclrf.chunks.BulletBillPlatformChunk;
 import levelGenerators.npclrf.chunks.Chunk;
+import levelGenerators.npclrf.chunks.EnemyGroupChunk;
 import levelGenerators.npclrf.chunks.ExitChunk;
 import levelGenerators.npclrf.chunks.FlatChunk;
+import levelGenerators.npclrf.chunks.FloatingPlatformChunk;
+import levelGenerators.npclrf.chunks.GapRunChunk;
 import levelGenerators.npclrf.chunks.PiranhaKoopaChunk;
+import levelGenerators.npclrf.chunks.PipeRunChunk;
 import levelGenerators.npclrf.chunks.SingleGapChunk;
 import levelGenerators.npclrf.chunks.SingleGoombaChunk;
 import levelGenerators.npclrf.chunks.SinglePipeChunk;
@@ -32,10 +37,10 @@ final class PacingGrammar {
     private static final Map<Symbol, List<Chunk>> CHUNKS = Map.of(
             Symbol.START, List.of(new StartChunk()),
             Symbol.EXIT, List.of(new ExitChunk(), new StaircaseExitChunk()),
-            Symbol.D0, List.of(new FlatChunk()),
+            Symbol.D0, List.of(new FlatChunk(), new BlockRowChunk()),
             Symbol.D1, List.of(new SingleGapChunk(), new SinglePipeChunk(), new SingleGoombaChunk()),
-            Symbol.D2, List.of(new StaircaseGapChunk()),
-            Symbol.D3, List.of(new PiranhaKoopaChunk()),
+            Symbol.D2, List.of(new StaircaseGapChunk(), new GapRunChunk(), new PipeRunChunk(), new EnemyGroupChunk()),
+            Symbol.D3, List.of(new PiranhaKoopaChunk(), new FloatingPlatformChunk()),
             Symbol.D4, List.of(new BulletBillPlatformChunk()));
 
     private static final Map<Symbol, List<List<Symbol>>> RULES = Map.of(
@@ -131,6 +136,14 @@ final class PacingGrammar {
             available -= extra;
         }
         return List.copyOf(sections);
+    }
+
+    static List<Chunk> chunks() {
+        List<Chunk> chunks = new ArrayList<>();
+        for (Symbol symbol : Symbol.values()) {
+            chunks.addAll(CHUNKS.getOrDefault(symbol, List.of()));
+        }
+        return List.copyOf(chunks);
     }
 
     private static int minimumWidth(List<Symbol> symbols) {

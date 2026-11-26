@@ -3,6 +3,7 @@ package levelGenerators.npclrf.chunks;
 import java.util.Random;
 
 import engine.core.MarioLevelModel;
+import levelGenerators.npclrf.JumpLimits;
 
 public final class StaircaseGapChunk implements Chunk {
     private static final int MIN_STEP_COUNT = 4;
@@ -10,7 +11,7 @@ public final class StaircaseGapChunk implements Chunk {
     private static final int GROUND_PADDING = 3;
     private static final int RUNWAY_WIDTH = 1;
     private static final int LANDING_WIDTH = 1;
-    private static final int GAP_WIDTH = 8;
+    private static final int GAP_WIDTH = JumpLimits.MAX_GAP;
 
     @Override
     public String name() {
